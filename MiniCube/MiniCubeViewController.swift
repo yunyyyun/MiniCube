@@ -10,16 +10,20 @@ import GLKit
 import OpenGLES
 import UIKit
 
-func BUFFER_OFFSET(i: Int) -> UnsafePointer<Void> {
-    let p: UnsafePointer<Void> = nil
-    return p.advancedBy(i)
+//func BUFFER_OFFSET(_ i: Int) -> UnsafeRawPointer {
+//    let p: UnsafeRawPointer? = nil
+//    return p.advancedBy(i)
+//}
+
+func BUFFER_OFFSET(_ i: Int) -> UnsafeRawPointer {
+    return UnsafeRawPointer(bitPattern: i)!
 }
 
 let UNIFORM_MODELVIEWPROJECTION_MATRIX = 0
 let UNIFORM_NORMAL_MATRIX = 1
 let UNIFORM_TEXTURE=2
 let UNIFORM_COLOR=3
-var uniforms = [GLint](count: 4, repeatedValue: 0)
+var uniforms = [GLint](repeating: 0, count: 4)
 
 class MiniCubeViewController: GLKViewController{
     
@@ -68,15 +72,15 @@ class MiniCubeViewController: GLKViewController{
     var tmpMat:GLKMatrix4=GLKMatrix4Identity //上次旋转的矩阵
     //var pickMagicCube:[[Int]]=[[Int]](count: 2, repeatedValue: [Int](count: 3, repeatedValue: 0))
     
-    var currentPickPixel:[GLubyte]=[GLubyte](count: 3, repeatedValue: 0)   //当前pick的颜色数据
-    var pickPixels:[[GLubyte]]=[[GLubyte]](count: 2, repeatedValue: [GLubyte](count: 3, repeatedValue: 0))  //pick方块的颜色数据
+    var currentPickPixel:[GLubyte]=[GLubyte](repeating: 0, count: 3)   //当前pick的颜色数据
+    var pickPixels:[[GLubyte]]=[[GLubyte]](repeating: [GLubyte](repeating: 0, count: 3), count: 2)  //pick方块的颜色数据
     var pickFlags=0  //0表示选中方块，10表示选中一个
     
     var rotationState = -1//ROTATE_NONE
     var _RotateAngle:GLfloat=0
     var _isSelectMode:Bool=false
     
-    var currentSlice=[GLint](count: 3, repeatedValue: -1)
+    var currentSlice=[GLint](repeating: -1, count: 3)
     
     //var mmm = [GLKMatrix4](count: 27, repeatedValue: GLKMatrix4Identity)
     var fff=0
@@ -84,7 +88,7 @@ class MiniCubeViewController: GLKViewController{
 //    GLubyte temp[16];
 //    int tempqueue[56];GLint squence[56]
     
-    var squence = [Int](count: 32, repeatedValue: 0)
+    var squence = [Int](repeating: 0, count: 32)
     
     //var testNum:GLuint=0
     
@@ -92,11 +96,11 @@ class MiniCubeViewController: GLKViewController{
     var round=StepNumber2{
         didSet{
             //timeLabel.text=NSString(format: "time:%02d:%02d", totalMicrosecond/60, totalMicrosecond%60) as String
-             promptLabel.hidden = (round==0 )
-            reset.enabled = (round==0)
+             promptLabel.isHidden = (round==0 )
+            reset.isEnabled = (round==0)
         }
     }
-    var timer:NSTimer!
+    var timer:Timer!
     var totalMicrosecond = 0{
         didSet{
             //timeLabel.text=NSString(format: "time:%02d:%02d", totalMicrosecond/60, totalMicrosecond%60) as String
@@ -108,14 +112,14 @@ class MiniCubeViewController: GLKViewController{
     var steps:Int = 0{
         didSet{
             stepLabel.text=NSString(format: "step:%d", steps) as String
-            stepLabel.textColor=UIColor.blueColor()
+            stepLabel.textColor=UIColor.blue
             if steps==1{
-                stepLabel.textColor=UIColor.blueColor()
-                timeLabel.textColor=UIColor.blueColor()
+                stepLabel.textColor=UIColor.blue
+                timeLabel.textColor=UIColor.blue
             }
             if steps==0{
-                stepLabel.textColor=UIColor.grayColor()
-                timeLabel.textColor=UIColor.grayColor()
+                stepLabel.textColor=UIColor.gray
+                timeLabel.textColor=UIColor.gray
             }
         }
     }
@@ -123,10 +127,10 @@ class MiniCubeViewController: GLKViewController{
     var isReduction = 0{
         didSet{
             if isReduction%10==1&&isReduction/10==0&&steps>0 {
-                successLabel.hidden=false
+                successLabel.isHidden=false
             }
             else {
-                successLabel.hidden = true
+                successLabel.isHidden = true
             }
         }
         willSet{
@@ -148,8 +152,8 @@ class MiniCubeViewController: GLKViewController{
     deinit {
         self.tearDownGL()
         
-        if EAGLContext.currentContext() === self.context {
-            EAGLContext.setCurrentContext(nil)
+        if EAGLContext.current() === self.context {
+            EAGLContext.setCurrent(nil)
         }
     }
     
@@ -158,14 +162,14 @@ class MiniCubeViewController: GLKViewController{
         
         stepNumber2=StepNumber2
         
-        self.context = EAGLContext(API: .OpenGLES2)
+        self.context = EAGLContext(api: .openGLES2)
         if !(self.context != nil) {
             ////////print("Failed to create ES context")
         }
         
         let view = self.view as! GLKView
         view.context = self.context!
-        view.drawableDepthFormat = .Format24
+        view.drawableDepthFormat = .format24
         
         self.setupGL()
         self.update()
@@ -173,45 +177,45 @@ class MiniCubeViewController: GLKViewController{
         let width=view.frame.width
         let height = view.frame.height
         
-        reset = UIButton(type: .Custom)
-        reset.frame = CGRectMake(1, 1, 55, 55)
-        reset.backgroundColor=UIColor.clearColor()
-        reset.setImage(UIImage(named:"Upset"),forState:.Normal)
-        reset.addTarget(self, action: #selector(MiniCubeViewController.clickToSet(_:)), forControlEvents: .TouchUpInside)
+        reset = UIButton(type: .custom)
+        reset.frame = CGRect(x: 1, y: 1, width: 55, height: 55)
+        reset.backgroundColor=UIColor.clear
+        reset.setImage(UIImage(named:"Upset"),for:UIControlState())
+        reset.addTarget(self, action: #selector(MiniCubeViewController.clickToSet(_:)), for: .touchUpInside)
         view.addSubview(reset)
         
-        timeLabel = UILabel(frame: CGRectMake(width-118, 2, 114, 24))
-        timeLabel.backgroundColor=UIColor.clearColor()
-        timeLabel.textColor=UIColor.grayColor()
+        timeLabel = UILabel(frame: CGRect(x: width-118, y: 2, width: 114, height: 24))
+        timeLabel.backgroundColor=UIColor.clear
+        timeLabel.textColor=UIColor.gray
         timeLabel.text="time:00:00:00"
-        timeLabel.textAlignment = .Left
+        timeLabel.textAlignment = .left
         view.addSubview(timeLabel)
         
-        stepLabel = UILabel(frame: CGRectMake(width-118, 30, 114, 24))
-        stepLabel.backgroundColor=UIColor.clearColor()
-        stepLabel.textColor=UIColor.grayColor()
+        stepLabel = UILabel(frame: CGRect(x: width-118, y: 30, width: 114, height: 24))
+        stepLabel.backgroundColor=UIColor.clear
+        stepLabel.textColor=UIColor.gray
         stepLabel.text="step:0"
-        stepLabel.textAlignment = .Left
+        stepLabel.textAlignment = .left
         view.addSubview(stepLabel)
         
-        promptLabel = UILabel(frame: CGRectMake(20, 66, width-40, 44))
-        promptLabel.backgroundColor=UIColor.clearColor()
-        promptLabel.textColor=UIColor.redColor()
+        promptLabel = UILabel(frame: CGRect(x: 20, y: 66, width: width-40, height: 44))
+        promptLabel.backgroundColor=UIColor.clear
+        promptLabel.textColor=UIColor.red
         promptLabel.text="请稍等，正在打乱魔方..."
-        promptLabel.textAlignment = .Center
-        promptLabel.hidden=true
+        promptLabel.textAlignment = .center
+        promptLabel.isHidden=true
         view.addSubview(promptLabel)
         
-        successLabel = UILabel(frame: CGRectMake(20, height-111, width-40, 44))
-        successLabel.backgroundColor=UIColor.clearColor()
-        successLabel.textColor=UIColor.redColor()
+        successLabel = UILabel(frame: CGRect(x: 20, y: height-111, width: width-40, height: 44))
+        successLabel.backgroundColor=UIColor.clear
+        successLabel.textColor=UIColor.red
         successLabel.text="恭喜你，魔方已被还原！"
-        successLabel.textAlignment = .Center
-        successLabel.hidden=true
+        successLabel.textAlignment = .center
+        successLabel.isHidden=true
         view.addSubview(successLabel)
     }
     
-    func clickToSet(btn:UIButton){
+    func clickToSet(_ btn:UIButton){
         ////////print("clicker")
         resetCube()
         stepNumber2=StepNumber2
@@ -231,7 +235,7 @@ class MiniCubeViewController: GLKViewController{
         //////print("after..........",isReduction)
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         
         backgroundColorR = GLubyte(backGroundColorR)
         backgroundColorG=GLubyte(backGroundColorG)
@@ -243,41 +247,41 @@ class MiniCubeViewController: GLKViewController{
         self.update()
         rotationState = ROTATE_NONE
         _isPaused=0
-        let app = UIApplication.sharedApplication()
-        NSNotificationCenter.defaultCenter().addObserver(self, selector:#selector(UIApplicationDelegate.applicationWillEnterForeground(_:)), name: UIApplicationWillEnterForegroundNotification, object: app)
+        let app = UIApplication.shared
+        NotificationCenter.default.addObserver(self, selector:#selector(UIApplicationDelegate.applicationWillEnterForeground(_:)), name: NSNotification.Name.UIApplicationWillEnterForeground, object: app)
     }
     
-    func applicationWillEnterForeground(notification: NSNotification){
+    func applicationWillEnterForeground(_ notification: Notification){
         self.update()
         //rotationState = ROTATE_NONE
         _isPaused=0
         rotationState = ROTATE_NONE
     }
     
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         _isPaused=1
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
 
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         
-        if self.isViewLoaded() && (self.view.window != nil) {
+        if self.isViewLoaded && (self.view.window != nil) {
             self.view = nil
             
             self.tearDownGL()
             
-            if EAGLContext.currentContext() === self.context {
-                EAGLContext.setCurrentContext(nil)
+            if EAGLContext.current() === self.context {
+                EAGLContext.setCurrent(nil)
             }
             self.context = nil
         }
     }
     
     func setupGL() {
-        EAGLContext.setCurrentContext(self.context)
+        EAGLContext.setCurrent(self.context)
         self.loadShaders()
         glEnable(UInt32(GL_DEPTH_TEST))
         glEnable(UInt32(GL_SMOOTH))
@@ -288,7 +292,7 @@ class MiniCubeViewController: GLKViewController{
     }
     
     func tearDownGL() {
-        EAGLContext.setCurrentContext(self.context)
+        EAGLContext.setCurrent(self.context)
         
         glDeleteBuffers(1, &vertexBuffer)
         glDeleteVertexArraysOES(1, &vertexArray)
@@ -301,29 +305,29 @@ class MiniCubeViewController: GLKViewController{
         }
     }
     
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        point1=(touches as NSSet).anyObject()!.locationInView(self.view)
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        point1=((touches as NSSet).anyObject()! as AnyObject).location(in: self.view)
         ////////print(point1)
         move_flag=false
         rotateType=rotateType(point1)
     }
     
-    override func touchesMoved(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
 //        if rotateType != 0 {
 //            return
 //        }
-                point2=(touches as NSSet).anyObject()!.locationInView(self.view)
+                point2=((touches as NSSet).anyObject()! as AnyObject).location(in: self.view)
         if (point2.x-point1.x)*(point2.x-point1.x)>0-(point2.y-point1.y)*(point2.y-point1.y){
             if move_flag && rotationState == ROTATE_NONE{
                 if rotateType != 0 && round==0{
                     _isSelectMode=true
                     return
                 }
-                var startVec3:[Float]=[Float](count: 3, repeatedValue: 0.0)//轨迹球坐标
-                var endVec3:[Float]=[Float](count: 3, repeatedValue: 0.0)
+                var startVec3:[Float]=[Float](repeating: 0.0, count: 3)//轨迹球坐标
+                var endVec3:[Float]=[Float](repeating: 0.0, count: 3)
                 startVec3=mapToSphere(point2)
                 endVec3=mapToSphere(point1)
-                var rotQuaternion:[Float]=[Float](count: 4, repeatedValue: 0.0)
+                var rotQuaternion:[Float]=[Float](repeating: 0.0, count: 4)
                 rotQuaternion = getQuaternion(startVec3,endVec3: endVec3)
                 rotMat = getRotationMatrix(rotQuaternion)
                 rotMat=GLKMatrix4Multiply(rotMat,tmpMat);
@@ -332,7 +336,7 @@ class MiniCubeViewController: GLKViewController{
         }
     }
     
-    override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?) {
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         tmpMat=rotMat
         if rotationState==ROTATE_ALL {
             rotationState = ROTATE_NONE
@@ -348,7 +352,7 @@ class MiniCubeViewController: GLKViewController{
 //        }
     }
     
-    func checkIfCoplanar2(i: Int, j: Int, k: Int, l: Int)->Bool {
+    func checkIfCoplanar2(_ i: Int, j: Int, k: Int, l: Int)->Bool {
         if magicCube.cubes[i].row==magicCube.cubes[j].row&&magicCube.cubes[j].row==magicCube.cubes[k].row&&magicCube.cubes[k].row==magicCube.cubes[l].row {
             return true
         }
@@ -376,10 +380,10 @@ class MiniCubeViewController: GLKViewController{
         return (isReduction/10)*10
     }
     
-    func rotateType(point:CGPoint)->Int{
-        let viewport=UnsafeMutablePointer<GLint>.alloc(4*sizeof(GLint))
+    func rotateType(_ point:CGPoint)->Int{
+        let viewport=UnsafeMutablePointer<GLint>.allocate(capacity: 4*MemoryLayout<GLint>.size)
         glGetIntegerv(UInt32(GL_VIEWPORT), viewport)
-        let tmpPixel=UnsafeMutablePointer<GLubyte>.alloc(4*sizeof(GLubyte))
+        let tmpPixel=UnsafeMutablePointer<GLubyte>.allocate(capacity: 4*MemoryLayout<GLubyte>.size)
         let x:GLint=2*GLint(point.x)
         let y:GLint=GLint(viewport[3])-2*GLint(point.y)
         glReadPixels(x,y,1,1,GLenum(GL_RGBA),GLenum(GL_UNSIGNED_BYTE),tmpPixel)
@@ -404,7 +408,7 @@ class MiniCubeViewController: GLKViewController{
         modelViewProjectionMatrix = GLKMatrix4Multiply(projectionMatrix, modelViewMatrix);
     }
     
-    override func glkView(view: GLKView, drawInRect rect: CGRect) {
+    override func glkView(_ view: GLKView, drawIn rect: CGRect) {
         var rotationAngle:GLfloat = -9.0
         //let a=6
         if round>0 {
@@ -464,11 +468,11 @@ class MiniCubeViewController: GLKViewController{
                     
                     glBindTexture(GLenum(GL_TEXTURE_2D),magicCube.textureArray[0])
                     
-                    glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Position.rawValue))
-                    glVertexAttribPointer(GLuint(GLKVertexAttrib.Position.rawValue), 3, GLenum(GL_FLOAT), GLboolean(GL_FALSE), 0,vertices)
+                    glEnableVertexAttribArray(GLuint(GLKVertexAttrib.position.rawValue))
+                    glVertexAttribPointer(GLuint(GLKVertexAttrib.position.rawValue), 3, GLenum(GL_FLOAT), GLboolean(GL_FALSE), 0,vertices)
                     
-                    glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Normal.rawValue))
-                    glVertexAttribPointer(GLuint(GLKVertexAttrib.Normal.rawValue), 2, GLenum(GL_FLOAT), GLboolean(GL_FALSE), 0,textureCoords)
+                    glEnableVertexAttribArray(GLuint(GLKVertexAttrib.normal.rawValue))
+                    glVertexAttribPointer(GLuint(GLKVertexAttrib.normal.rawValue), 2, GLenum(GL_FLOAT), GLboolean(GL_FALSE), 0,textureCoords)
                     
                     var rotMatrix = GLKMatrix4Identity
                     rotMatrix = magicCube.cubes[(i-1)*2+(j-1)+(k-1)*4].mmm
@@ -546,9 +550,14 @@ class MiniCubeViewController: GLKViewController{
                     let temp = GLKMatrix4Multiply(tempModeviewMatrix,rotMatrix)
                     modelViewProjectionMatrix = temp
                     
-                    withUnsafePointer(&modelViewProjectionMatrix, {
-                        glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, UnsafePointer($0))
+                    withUnsafePointer(to: &modelViewProjectionMatrix, {
+                        $0.withMemoryRebound(to: Float.self, capacity: 16, {
+                            glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, $0)
+                        })
                     })
+//                    withUnsafePointer(to: &modelViewProjectionMatrix, {
+//                        glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, UnsafePointer($0))
+//                    })
                     glDrawArrays(GLenum(GL_TRIANGLE_STRIP), 0, GLsizei(24));
                     modelViewProjectionMatrix = tempModeviewMatrix
                 }
@@ -567,7 +576,7 @@ class MiniCubeViewController: GLKViewController{
         //glClearColor(26.0/255.0, 0.0, 0.0, 0.0)
         glClearColor(GLfloat(backgroundColorR)/255.0,GLfloat(backgroundColorG)/255.0,GLfloat(backgroundColorB)/255.0, GLfloat(backgroundColorA)/255.0)
         //glClear(GLbitfield(GL_COLOR_BUFFER_BIT) | GLbitfield(GL_DEPTH_BUFFER_BIT))
-        let viewport=UnsafeMutablePointer<GLint>.alloc(4*sizeof(GLint))
+        let viewport=UnsafeMutablePointer<GLint>.allocate(capacity: 4*MemoryLayout<GLint>.size)
         glGetIntegerv(UInt32(GL_VIEWPORT), viewport)
         
         for i in 1...2{
@@ -578,11 +587,11 @@ class MiniCubeViewController: GLKViewController{
                     //let textureCoords=magicCube.cubes[(i-1)*2+(j-1)+(k-1)*4].textureCoords
                     let colors=magicCube.cubes[(i-1)*2+(j-1)+(k-1)*4].colors
                     ////////print(colors)
-                    glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Position.rawValue))
-                    glVertexAttribPointer(GLuint(GLKVertexAttrib.Position.rawValue), 3, GLenum(GL_FLOAT), GLboolean(GL_FALSE), 0,vertices)
+                    glEnableVertexAttribArray(GLuint(GLKVertexAttrib.position.rawValue))
+                    glVertexAttribPointer(GLuint(GLKVertexAttrib.position.rawValue), 3, GLenum(GL_FLOAT), GLboolean(GL_FALSE), 0,vertices)
                     
-                    glEnableVertexAttribArray(GLuint(GLKVertexAttrib.Color.rawValue))
-                    glVertexAttribPointer(GLuint(GLKVertexAttrib.Color.rawValue), 4, GLenum(GL_UNSIGNED_BYTE), 1, 0,colors)
+                    glEnableVertexAttribArray(GLuint(GLKVertexAttrib.color.rawValue))
+                    glVertexAttribPointer(GLuint(GLKVertexAttrib.color.rawValue), 4, GLenum(GL_UNSIGNED_BYTE), 1, 0,colors)
                     
                     var rotMatrix = GLKMatrix4Identity
                     rotMatrix = magicCube.cubes[(i-1)*2+(j-1)+(k-1)*4].mmm
@@ -591,8 +600,13 @@ class MiniCubeViewController: GLKViewController{
                     let temp = GLKMatrix4Multiply(tempModeviewMatrix,rotMatrix)
                     modelViewProjectionMatrix = temp
                     
-                    withUnsafePointer(&modelViewProjectionMatrix, {
-                        glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, UnsafePointer($0))
+//                    withUnsafePointer(to: &modelViewProjectionMatrix, {
+//                        glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, UnsafePointer($0))
+//                    })
+                    withUnsafePointer(to: &modelViewProjectionMatrix, {
+                        $0.withMemoryRebound(to: Float.self, capacity: 16, {
+                            glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, $0)
+                        })
                     })
 //                    withUnsafePointer(&colors, {
 //                        glUniformMatrix4fv(uniforms[UNIFORM_COLOR], 1, 0, UnsafePointer($0))
@@ -602,8 +616,8 @@ class MiniCubeViewController: GLKViewController{
                 }
             }
         }
-        let pixel=UnsafeMutablePointer<GLubyte>.alloc(4*sizeof(GLubyte))
-        let tmpPixel=UnsafeMutablePointer<GLubyte>.alloc(4*sizeof(GLubyte))
+        let pixel=UnsafeMutablePointer<GLubyte>.allocate(capacity: 4*MemoryLayout<GLubyte>.size)
+        let tmpPixel=UnsafeMutablePointer<GLubyte>.allocate(capacity: 4*MemoryLayout<GLubyte>.size)
         let x:GLint=2*GLint(point1.x)
         let y:GLint=GLint(viewport[3])-2*GLint(point1.y)
         glReadPixels(x,y,1,1,GLenum(GL_RGBA),GLenum(GL_UNSIGNED_BYTE),pixel)
@@ -718,26 +732,26 @@ class MiniCubeViewController: GLKViewController{
         
         //创建并编译顶点着色器.
         if _isSelectMode{
-            vertShaderPathname = NSBundle.mainBundle().pathForResource("PickerShader", ofType: "vsh")!
+            vertShaderPathname = Bundle.main.path(forResource: "PickerShader", ofType: "vsh")!
             if self.compileShader(&vertShader, type: GLenum(GL_VERTEX_SHADER), file: vertShaderPathname) == false {
                 ////////print("Failed to compile vertex shader")
                 return false
             }
             //创建并编译片段着色器.
-            fragShaderPathname = NSBundle.mainBundle().pathForResource("PickerShader", ofType: "fsh")!
+            fragShaderPathname = Bundle.main.path(forResource: "PickerShader", ofType: "fsh")!
             if !self.compileShader(&fragShader, type: GLenum(GL_FRAGMENT_SHADER), file: fragShaderPathname) {
                 ////////print("Failed to compile fragment shader")
                 return false
             }
         }
         else{
-            vertShaderPathname = NSBundle.mainBundle().pathForResource("Shader", ofType: "vsh")!
+            vertShaderPathname = Bundle.main.path(forResource: "Shader", ofType: "vsh")!
             if self.compileShader(&vertShader, type: GLenum(GL_VERTEX_SHADER), file: vertShaderPathname) == false {
                 ////////print("Failed to compile vertex shader")
                 return false
             }
             //创建并编译片段着色器.
-            fragShaderPathname = NSBundle.mainBundle().pathForResource("Shader", ofType: "fsh")!
+            fragShaderPathname = Bundle.main.path(forResource: "Shader", ofType: "fsh")!
             if !self.compileShader(&fragShader, type: GLenum(GL_FRAGMENT_SHADER), file: fragShaderPathname) {
                 ////////print("Failed to compile fragment shader")
                 return false
@@ -753,8 +767,8 @@ class MiniCubeViewController: GLKViewController{
         //设置 顶点着色器和片段着色器 的输入参数。
         //"position"和"normal"与着色器代码Shader.vsh里面的2个attribute对应，
         //分别与setupGL加载的顶点数组里面的顶点和法线数据对应起来。
-        glBindAttribLocation(program, GLuint(GLKVertexAttrib.Position.rawValue), "positionShader")
-        glBindAttribLocation(program, GLuint(GLKVertexAttrib.Color.rawValue), "colorShader")
+        glBindAttribLocation(program, GLuint(GLKVertexAttrib.position.rawValue), "positionShader")
+        glBindAttribLocation(program, GLuint(GLKVertexAttrib.color.rawValue), "colorShader")
         
         //链接程序.
         if !self.linkProgram(program) {
@@ -795,17 +809,17 @@ class MiniCubeViewController: GLKViewController{
     }
     
     
-    func compileShader(inout shader: GLuint, type: GLenum, file: String) -> Bool {
+    func compileShader(_ shader: inout GLuint, type: GLenum, file: String) -> Bool {
         var status: GLint = 0
         var source: UnsafePointer<Int8>
         do {
-            source = try NSString(contentsOfFile: file, encoding: NSUTF8StringEncoding).UTF8String
+            source = try NSString(contentsOfFile: file, encoding: String.Encoding.utf8.rawValue).utf8String!
         } catch {
             //////(tmpPixel[0]==backgroundColorR&&tmpPixel[1]==backgroundColorG&&tmpPixel[2]==backgroundColorB&&tmpPixel[3]==backgroundColorA)("Failed to load vertex shader")
             return false
         }
-        var castSource = UnsafePointer<GLchar>(source)
-        
+        //var castSource = UnsafePointer<GLchar>(source)
+        var castSource: UnsafePointer<GLchar>? = UnsafePointer<GLchar>(source)
         shader = glCreateShader(type)
         glShaderSource(shader, 1, &castSource, nil)
         glCompileShader(shader)
@@ -829,7 +843,7 @@ class MiniCubeViewController: GLKViewController{
         return true
     }
     
-    func linkProgram(prog: GLuint) -> Bool {
+    func linkProgram(_ prog: GLuint) -> Bool {
         var status: GLint = 0
         glLinkProgram(prog)
         
@@ -852,14 +866,14 @@ class MiniCubeViewController: GLKViewController{
         return true
     }
     
-    func validateProgram(prog: GLuint) -> Bool {
+    func validateProgram(_ prog: GLuint) -> Bool {
         var logLength: GLsizei = 0
         var status: GLint = 0
         
         glValidateProgram(prog)
         glGetProgramiv(prog, GLenum(GL_INFO_LOG_LENGTH), &logLength)
         if logLength > 0 {
-            var log: [GLchar] = [GLchar](count: Int(logLength), repeatedValue: 0)
+            var log: [GLchar] = [GLchar](repeating: 0, count: Int(logLength))
             glGetProgramInfoLog(prog, logLength, &logLength, &log)
             ////////print("Program validate log: \n\(log)")
         }
@@ -874,7 +888,7 @@ class MiniCubeViewController: GLKViewController{
 
     /*******************MagicCubeLogjc************************************************************************************/
 
-    func checkRotationState( _cube1:CubeOfMini, face1:GLint, _cube2:CubeOfMini,face2:GLint,flag:GLint){
+    func checkRotationState( _ _cube1:CubeOfMini, face1:GLint, _cube2:CubeOfMini,face2:GLint,flag:GLint){
         var cube1=_cube1
         var cube2=_cube2
         if (flag == -1) {
@@ -946,7 +960,7 @@ class MiniCubeViewController: GLKViewController{
     }
     
     //需要替换的方块和对应面
-    func find(cubeIndex: Int, face: Int){
+    func find(_ cubeIndex: Int, face: Int){
         ////////print("find...",cubeIndex,face)
         
         let _cubeIndex=GLint(cubeIndex)
@@ -991,10 +1005,10 @@ class MiniCubeViewController: GLKViewController{
     }
     
     //调整pickerColor和row,col,layer参数
-    func changeColors(gap: Int){
+    func changeColors(_ gap: Int){
 
-        var temp = [GLubyte](count: 16, repeatedValue: 0)
-        var tempqueue = [Int](count: 32, repeatedValue: 0)
+        var temp = [GLubyte](repeating: 0, count: 16)
+        var tempqueue = [Int](repeating: 0, count: 32)
         
         //        var tempccc=0
         //        var tempfff=0
@@ -1089,7 +1103,7 @@ class MiniCubeViewController: GLKViewController{
     }
     
     //层转替换数据
-    func Rotate(rcl: Int,rotationState:Int){
+    func Rotate(_ rcl: Int,rotationState:Int){
         //return
         if (rotationState ==  ROTATE_Z_ANTICLOCKWISE) {
             let _squence:[Int] = [//1,5,3,3,7,4,5,1,
@@ -1166,7 +1180,7 @@ class MiniCubeViewController: GLKViewController{
             steps+=1
             if timer==nil {
                 totalMicrosecond=1
-                timer = NSTimer.scheduledTimerWithTimeInterval(0.01, target: self, selector: #selector(MiniCubeViewController.tick(_:)), userInfo: nil, repeats: true)
+                timer = Timer.scheduledTimer(timeInterval: 0.01, target: self, selector: #selector(MiniCubeViewController.tick(_:)), userInfo: nil, repeats: true)
             }
         }else {
             if round==1{
@@ -1181,7 +1195,7 @@ class MiniCubeViewController: GLKViewController{
         magicCube.initMagicCube(0)
     }
     
-    func tick(paramTimer: NSTimer){
+    func tick(_ paramTimer: Timer){
         if isReduction%10==0 {
             totalMicrosecond+=1
         }

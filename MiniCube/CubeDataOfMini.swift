@@ -11,7 +11,7 @@ import OpenGLES
 
 let MOVE2:GLfloat=1.0
 var colorFlag2=1
-var allTextureCoords2=[[GLfloat]](count: 8, repeatedValue: [GLfloat](count: 48, repeatedValue: 0.0))
+var allTextureCoords2=[[GLfloat]](repeating: [GLfloat](repeating: 0.0, count: 48), count: 8)
 
 let StepNumber2=22
 let backGroundColorR=11

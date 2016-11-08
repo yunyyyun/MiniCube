@@ -15,10 +15,10 @@ class MiniCube {
 //    var hidden = [[[Bool]]](count: 6, repeatedValue:[[Bool]](count: 6, repeatedValue:
 //        [Bool](count: 6, repeatedValue:false)))
     
-    var cubes=[CubeOfMini](count: 8, repeatedValue: CubeOfMini())
-    var textureArray = [GLuint](count: TextureNum, repeatedValue:0)  //纹理数组
+    var cubes=[CubeOfMini](repeating: CubeOfMini(), count: 8)
+    var textureArray = [GLuint](repeating: 0, count: TextureNum)  //纹理数组
     
-    func initMagicCube(flag: Int=0){
+    func initMagicCube(_ flag: Int=0){
 
         colorFlag2=1
         
@@ -80,14 +80,14 @@ class MiniCube {
     
     func loadTextureEXT()->GLuint{
         let textureImage=createCGImageEXT()
-        let width=CGImageGetWidth(textureImage)
-        let height=CGImageGetHeight(textureImage)
+        let width=textureImage.width
+        let height=textureImage.height
         //let textureData=calloc(width*height*4, sizeof(GLubyte))
-        let textureData=UnsafeMutablePointer<GLubyte>.alloc(width*height*4*sizeof(GLubyte))
+        let textureData=UnsafeMutablePointer<GLubyte>.allocate(capacity: width*height*4*MemoryLayout<GLubyte>.size)
         //let bithiddenInfo = CGBithiddenInfo(rawValue: CGImageAlphaInfo.PremultipliedLast.rawValue)
-        let textureContext=CGBitmapContextCreate(textureData, width, height, 8, width*4, CGImageGetColorSpace(textureImage), UInt32(1))//todo
+        let textureContext=CGContext(data: textureData, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width*4, space: textureImage.colorSpace!, bitmapInfo: UInt32(1))//todo
         
-        CGContextDrawImage(textureContext, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), textureImage)
+        textureContext?.draw(textureImage, in: CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)))
         var textureName:GLuint=0
         glGenTextures(1, &textureName)
         glBindTexture(UInt32(GL_TEXTURE_2D), textureName)
@@ -112,16 +112,16 @@ class MiniCube {
         //print("textureName====",textureName)
         return textureName
     }
-    func loadTextureEXTBySavedImage(savedImage: UIImage)->GLuint{
-        let textureImage=savedImage.CGImage
-        let width=CGImageGetWidth(textureImage)
-        let height=CGImageGetHeight(textureImage)
+    func loadTextureEXTBySavedImage(_ savedImage: UIImage)->GLuint{
+        let textureImage=savedImage.cgImage
+        let width=textureImage?.width
+        let height=textureImage?.height
         //let textureData=calloc(width*height*4, sizeof(GLubyte))
-        let textureData=UnsafeMutablePointer<GLubyte>.alloc(width*height*4*sizeof(GLubyte))
+        let textureData=UnsafeMutablePointer<GLubyte>.allocate(capacity: width!*height!*4*MemoryLayout<GLubyte>.size)
         //let bithiddenInfo = CGBithiddenInfo(rawValue: CGImageAlphaInfo.PremultipliedLast.rawValue)
-        let textureContext=CGBitmapContextCreate(textureData, width, height, 8, width*4, CGImageGetColorSpace(textureImage), UInt32(1))//todo
+        let textureContext=CGContext(data: textureData, width: width!, height: height!, bitsPerComponent: 8, bytesPerRow: width!*4, space: (textureImage?.colorSpace!)!, bitmapInfo: UInt32(1))//todo
         
-        CGContextDrawImage(textureContext, CGRectMake(0, 0, CGFloat(width), CGFloat(height)), textureImage)
+        textureContext?.draw(textureImage!, in: CGRect(x: 0, y: 0, width: CGFloat(width!), height: CGFloat(height!)))
         var textureName:GLuint=0
         
         var savedTextureName=GLuint(TextureNum)
@@ -131,7 +131,7 @@ class MiniCube {
         glBindTexture(UInt32(GL_TEXTURE_2D), textureName)
         glTexParameteri(UInt32(GL_TEXTURE_2D), UInt32(GL_TEXTURE_MIN_FILTER), GL_LINEAR)
         glTexParameteri(UInt32(GL_TEXTURE_2D), UInt32(GL_TEXTURE_MAG_FILTER), GL_LINEAR)
-        glTexImage2D(UInt32(GL_TEXTURE_2D), 0, GLint(GL_RGBA), GLsizei(width), GLsizei(height), 0, GLenum(GL_RGBA), GLenum(GL_UNSIGNED_BYTE), textureData)
+        glTexImage2D(UInt32(GL_TEXTURE_2D), 0, GLint(GL_RGBA), GLsizei(width!), GLsizei(height!), 0, GLenum(GL_RGBA), GLenum(GL_UNSIGNED_BYTE), textureData)
         //print("textureName====loadTextureEXTBySavedImage",textureName)
         return textureName
     }
@@ -152,41 +152,41 @@ class MiniCube {
         let img4 = UIImage(named: f4)
         let img5 = UIImage(named: f5)
         let img6 = UIImage(named: f6)
-        return createTextureWithImageEXT(img1!, img2: img2!, img3: img3!, img4: img4!, img5: img5!, img6: img6!, targetIMG: img!).CGImage!
+        return createTextureWithImageEXT(img1!, img2: img2!, img3: img3!, img4: img4!, img5: img5!, img6: img6!, targetIMG: img!).cgImage!
     }
     
-    func createTextureWithImageEXT(img1:UIImage,img2:UIImage,img3:UIImage,img4:UIImage,img5:UIImage,img6:UIImage,targetIMG:UIImage)->UIImage{
+    func createTextureWithImageEXT(_ img1:UIImage,img2:UIImage,img3:UIImage,img4:UIImage,img5:UIImage,img6:UIImage,targetIMG:UIImage)->UIImage{
         let totalWidth = targetIMG.size.width
         let totalHeight = targetIMG.size.height
-        let offScreeSize = CGSizeMake(totalWidth, totalHeight)
+        let offScreeSize = CGSize(width: totalWidth, height: totalHeight)
         UIGraphicsBeginImageContext(offScreeSize)
         let width = totalWidth/3
         let height = totalWidth/3
         
-        let rect1 = CGRectMake(0, 0, width, height)
-        img1.drawInRect(rect1)
+        let rect1 = CGRect(x: 0, y: 0, width: width, height: height)
+        img1.draw(in: rect1)
         
-        let rect2 = CGRectMake(0, height, width, height)
-        img2.drawInRect(rect2)
+        let rect2 = CGRect(x: 0, y: height, width: width, height: height)
+        img2.draw(in: rect2)
         
-        let rect3 = CGRectMake(0, height*2, width, height)
-        img3.drawInRect(rect3)
+        let rect3 = CGRect(x: 0, y: height*2, width: width, height: height)
+        img3.draw(in: rect3)
         
-        let rect4 = CGRectMake(width, 0, width, height)
-        img4.drawInRect(rect4)
+        let rect4 = CGRect(x: width, y: 0, width: width, height: height)
+        img4.draw(in: rect4)
         
-        let rect5 = CGRectMake(width, height, width, height)
-        img5.drawInRect(rect5)
+        let rect5 = CGRect(x: width, y: height, width: width, height: height)
+        img5.draw(in: rect5)
         
-        let rect6 = CGRectMake(width, height*2, width, height)
-        img6.drawInRect(rect6)
+        let rect6 = CGRect(x: width, y: height*2, width: width, height: height)
+        img6.draw(in: rect6)
         
-        targetIMG.drawInRect(CGRectMake(0, 0, totalWidth, totalHeight))
+        targetIMG.draw(in: CGRect(x: 0, y: 0, width: totalWidth, height: totalHeight))
         
         let textureImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         
-        return textureImage
+        return textureImage!
     }
 }
 

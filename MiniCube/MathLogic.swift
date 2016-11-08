@@ -10,7 +10,7 @@ import GLKit
 import OpenGLES
 
 //计算射线方向的下一个点
-func getNextPoint(point1: CGPoint,point2: CGPoint,inc:GLint)->CGPoint{
+func getNextPoint(_ point1: CGPoint,point2: CGPoint,inc:GLint)->CGPoint{
     
     let deltaX:CGFloat = point2.x - point1.x;
     let deltaY:CGFloat = point2.y - point1.y;
@@ -18,20 +18,20 @@ func getNextPoint(point1: CGPoint,point2: CGPoint,inc:GLint)->CGPoint{
     var point3=CGPoint()
     let t = CGFloat(inc/2)+1.0
     
-    point3 = CGPointMake(point1.x+deltaX*t, point1.y+deltaY*t)
+    point3 = CGPoint(x: point1.x+deltaX*t, y: point1.y+deltaY*t)
     
     return point3
 }
 
 //CFPoint映射到轨迹球上
-func mapToSphere(point: CGPoint)->[Float]{
+func mapToSphere(_ point: CGPoint)->[Float]{
     let adjustWidth:CGFloat=1.0/((375-1.0)*0.5)
     let adjustHeight:CGFloat=1.0/((667-1.0)*0.5)
     var tmpPoint:CGPoint=CGPoint()
     tmpPoint.x=(point.x*adjustWidth)-1.0
     tmpPoint.y=1.0-(point.y*adjustHeight)
     let length=(tmpPoint.x*tmpPoint.x)+(tmpPoint.y*tmpPoint.y)
-    var tmpVec3:[Float]=[Float](count: 3, repeatedValue: 0.0)
+    var tmpVec3:[Float]=[Float](repeating: 0.0, count: 3)
     if length>1.0{
         tmpVec3[0]=Float(tmpPoint.x/sqrt(length))
         tmpVec3[1]=Float(tmpPoint.y/sqrt(length))
@@ -46,8 +46,8 @@ func mapToSphere(point: CGPoint)->[Float]{
 }
 
 //求得轨迹球旋转四元数
-func getQuaternion(startVec3: [Float],endVec3: [Float])->[Float]{
-    var rotQuaternion:[Float]=[Float](count: 4, repeatedValue: 0.0)
+func getQuaternion(_ startVec3: [Float],endVec3: [Float])->[Float]{
+    var rotQuaternion:[Float]=[Float](repeating: 0.0, count: 4)
     rotQuaternion[0]=(startVec3[1]*endVec3[2])-(startVec3[2]*endVec3[1])
     rotQuaternion[1]=(startVec3[2]*endVec3[0])-(startVec3[0]*endVec3[2])
     rotQuaternion[2]=(startVec3[0]*endVec3[1])-(startVec3[1]*endVec3[0])
@@ -66,7 +66,7 @@ func getQuaternion(startVec3: [Float],endVec3: [Float])->[Float]{
 }
 
 //求得轨迹球旋转矩阵
-func getRotationMatrix(rotQuaternion: [Float])->GLKMatrix4{
+func getRotationMatrix(_ rotQuaternion: [Float])->GLKMatrix4{
     let x=rotQuaternion[0];
     let y=rotQuaternion[1];
     let z=rotQuaternion[2];

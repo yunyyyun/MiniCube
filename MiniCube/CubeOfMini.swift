@@ -12,9 +12,9 @@ import OpenGLES
 class CubeOfMini: NSObject {
     
     
-    var vertices=[GLfloat](count: 72, repeatedValue: 0.0) //pointX,pointY,pointZ
-    var textureCoords=[GLfloat](count: 48, repeatedValue: 0.0) //textureX,textureY
-    var colors=[GLubyte](count: 96, repeatedValue: 0)
+    var vertices=[GLfloat](repeating: 0.0, count: 72) //pointX,pointY,pointZ
+    var textureCoords=[GLfloat](repeating: 0.0, count: 48) //textureX,textureY
+    var colors=[GLubyte](repeating: 0, count: 96)
     var row:GLint=0
     var col:GLint=0
     var layer:GLint=0
@@ -22,7 +22,7 @@ class CubeOfMini: NSObject {
     var mmm = GLKMatrix4Identity  
     
     
-    func initVecticesData(row:GLint, col:GLint,layer:GLint){
+    func initVecticesData(_ row:GLint, col:GLint,layer:GLint){
         let moveX:GLfloat =   MOVE2 * GLfloat(col)-0.5
         let moveY:GLfloat  =  -MOVE2 * GLfloat(row)+0.5
         let moveZ:GLfloat  =  -MOVE2 * GLfloat(layer)+0.5

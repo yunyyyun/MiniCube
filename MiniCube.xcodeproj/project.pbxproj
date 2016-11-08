@@ -121,6 +121,7 @@
 					51CBA82B1D33E23200B7937A = {
 						CreatedOnToolsVersion = 7.3.1;
 						DevelopmentTeam = 3873X9398P;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -292,6 +293,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = f.MiniCube;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -307,6 +309,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = f.MiniCube;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
@@ -329,6 +332,7 @@
 				51CBA8441D33E23200B7937A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
