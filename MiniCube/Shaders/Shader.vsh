@@ -24,7 +24,7 @@ void main()
     //vec4 diffuseColor = vec4(1, 1, 1, 1.0);
     
     //float nDotVP = max(0.0, dot(eyeNormal, normalize(lightPosition)));
-                 
+    
     //colorVarying = diffuseColor * nDotVP;
     
     gl_Position = modelViewProjectionMatrixShader * positionShader;

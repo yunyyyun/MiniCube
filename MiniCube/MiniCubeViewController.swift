@@ -769,7 +769,7 @@ class MiniCubeViewController: GLKViewController{
         //分别与setupGL加载的顶点数组里面的顶点和法线数据对应起来。
         glBindAttribLocation(program, GLuint(GLKVertexAttrib.position.rawValue), "positionShader")
         glBindAttribLocation(program, GLuint(GLKVertexAttrib.color.rawValue), "colorShader")
-        
+        //glBindAttribLocation(program, GLuint(GLKVertexAttrib.normal.rawValue), "normalMatrix")
         //链接程序.
         if !self.linkProgram(program) {
             ////////print("Failed to link program: \(program)")
