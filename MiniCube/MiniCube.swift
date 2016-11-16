@@ -137,13 +137,13 @@ class MiniCube {
     }
     
     func createCGImageEXT()-> CGImage{
-        let ff = "cc"//f[flages]+f[flages]
-        let f1 = "c1"
-        let f2 = "c2"
-        let f3 = "c3"
-        let f4 = "c4"
-        let f5 = "c7"
-        let f6 = "c6"
+        let ff = "ff"//f[flages]+f[flages]
+        let f1 = "f1"
+        let f2 = "f2"
+        let f3 = "f3"
+        let f4 = "f4"
+        let f5 = "f5"
+        let f6 = "f6"
         
         let img = UIImage(named: ff)
         let img1 = UIImage(named: f1)

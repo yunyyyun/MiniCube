@@ -16,8 +16,6 @@
 		51CBA84C1D33E29000B7937A /* MiniCube.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CBA8481D33E29000B7937A /* MiniCube.swift */; };
 		51CBA84D1D33E29000B7937A /* MiniCubeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CBA8491D33E29000B7937A /* MiniCubeViewController.swift */; };
 		51CBA84F1D33E62D00B7937A /* MathLogic.swift in Sources */ = {isa = PBXBuildFile; fileRef = 51CBA84E1D33E62D00B7937A /* MathLogic.swift */; };
-		51CBA8521D33E81D00B7937A /* PickerShader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 51CBA8501D33E81D00B7937A /* PickerShader.fsh */; };
-		51CBA8531D33E81D00B7937A /* PickerShader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 51CBA8511D33E81D00B7937A /* PickerShader.vsh */; };
 		51CBA8561D33EC3600B7937A /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 51CBA8541D33EC3600B7937A /* Shader.fsh */; };
 		51CBA8571D33EC3600B7937A /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 51CBA8551D33EC3600B7937A /* Shader.vsh */; };
 /* End PBXBuildFile section */
@@ -34,8 +32,6 @@
 		51CBA8481D33E29000B7937A /* MiniCube.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniCube.swift; sourceTree = "<group>"; };
 		51CBA8491D33E29000B7937A /* MiniCubeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MiniCubeViewController.swift; sourceTree = "<group>"; };
 		51CBA84E1D33E62D00B7937A /* MathLogic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MathLogic.swift; sourceTree = "<group>"; };
-		51CBA8501D33E81D00B7937A /* PickerShader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = PickerShader.fsh; path = Shaders/PickerShader.fsh; sourceTree = "<group>"; };
-		51CBA8511D33E81D00B7937A /* PickerShader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = PickerShader.vsh; path = Shaders/PickerShader.vsh; sourceTree = "<group>"; };
 		51CBA8541D33EC3600B7937A /* Shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Shader.fsh; path = Shaders/Shader.fsh; sourceTree = "<group>"; };
 		51CBA8551D33EC3600B7937A /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Shader.vsh; path = Shaders/Shader.vsh; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -72,8 +68,6 @@
 			children = (
 				51CBA8541D33EC3600B7937A /* Shader.fsh */,
 				51CBA8551D33EC3600B7937A /* Shader.vsh */,
-				51CBA8501D33E81D00B7937A /* PickerShader.fsh */,
-				51CBA8511D33E81D00B7937A /* PickerShader.vsh */,
 				51CBA84E1D33E62D00B7937A /* MathLogic.swift */,
 				51CBA8461D33E29000B7937A /* CubeDataOfMini.swift */,
 				51CBA8471D33E29000B7937A /* CubeOfMini.swift */,
@@ -150,11 +144,9 @@
 			files = (
 				51CBA8561D33EC3600B7937A /* Shader.fsh in Resources */,
 				51CBA8571D33EC3600B7937A /* Shader.vsh in Resources */,
-				51CBA8521D33E81D00B7937A /* PickerShader.fsh in Resources */,
 				51CBA8391D33E23200B7937A /* Main.storyboard in Resources */,
 				51CBA83B1D33E23200B7937A /* Assets.xcassets in Resources */,
 				51CBA83E1D33E23200B7937A /* LaunchScreen.storyboard in Resources */,
-				51CBA8531D33E81D00B7937A /* PickerShader.vsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

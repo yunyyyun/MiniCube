@@ -7,10 +7,15 @@
 //
 varying lowp vec2 TexCoordOut;
 uniform sampler2D Texture; // New
-//varying lowp vec4 colorVarying;
+varying lowp vec4 colorVarying;
+varying lowp vec2 shaderTypeOut;
 
 void main()
 {
-    //gl_FragColor = colorVarying;
-    gl_FragColor=texture2D(Texture, TexCoordOut);
+    if (shaderTypeOut[1]<1.0){
+        gl_FragColor=texture2D(Texture, TexCoordOut);
+    }
+    else{
+        gl_FragColor = colorVarying;
+    }
 }

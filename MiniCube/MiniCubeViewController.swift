@@ -21,7 +21,7 @@ func BUFFER_OFFSET(_ i: Int) -> UnsafeRawPointer {
 
 let UNIFORM_MODELVIEWPROJECTION_MATRIX = 0
 let UNIFORM_NORMAL_MATRIX = 1
-let UNIFORM_TEXTURE=2
+let UNIFORM_SHADER_TYPE=2
 let UNIFORM_COLOR=3
 var uniforms = [GLint](repeating: 0, count: 4)
 
@@ -558,6 +558,9 @@ class MiniCubeViewController: GLKViewController{
 //                    withUnsafePointer(to: &modelViewProjectionMatrix, {
 //                        glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, UnsafePointer($0))
 //                    })
+                    let shaderType:GLint=1
+                    glUniform1i(uniforms[UNIFORM_SHADER_TYPE], shaderType)
+                    
                     glDrawArrays(GLenum(GL_TRIANGLE_STRIP), 0, GLsizei(24));
                     modelViewProjectionMatrix = tempModeviewMatrix
                 }
@@ -608,6 +611,9 @@ class MiniCubeViewController: GLKViewController{
                             glUniformMatrix4fv(uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX], 1, 0, $0)
                         })
                     })
+                    
+                    let shaderType:GLint=0
+                    glUniform1i(uniforms[UNIFORM_SHADER_TYPE], shaderType)
 //                    withUnsafePointer(&colors, {
 //                        glUniformMatrix4fv(uniforms[UNIFORM_COLOR], 1, 0, UnsafePointer($0))
 //                    })
@@ -731,31 +737,16 @@ class MiniCubeViewController: GLKViewController{
         program = glCreateProgram()
         
         //创建并编译顶点着色器.
-        if _isSelectMode{
-            vertShaderPathname = Bundle.main.path(forResource: "PickerShader", ofType: "vsh")!
-            if self.compileShader(&vertShader, type: GLenum(GL_VERTEX_SHADER), file: vertShaderPathname) == false {
-                ////////print("Failed to compile vertex shader")
-                return false
-            }
-            //创建并编译片段着色器.
-            fragShaderPathname = Bundle.main.path(forResource: "PickerShader", ofType: "fsh")!
-            if !self.compileShader(&fragShader, type: GLenum(GL_FRAGMENT_SHADER), file: fragShaderPathname) {
-                ////////print("Failed to compile fragment shader")
-                return false
-            }
+        vertShaderPathname = Bundle.main.path(forResource: "Shader", ofType: "vsh")!
+        if self.compileShader(&vertShader, type: GLenum(GL_VERTEX_SHADER), file: vertShaderPathname) == false {
+            ////////print("Failed to compile vertex shader")
+            return false
         }
-        else{
-            vertShaderPathname = Bundle.main.path(forResource: "Shader", ofType: "vsh")!
-            if self.compileShader(&vertShader, type: GLenum(GL_VERTEX_SHADER), file: vertShaderPathname) == false {
-                ////////print("Failed to compile vertex shader")
-                return false
-            }
-            //创建并编译片段着色器.
-            fragShaderPathname = Bundle.main.path(forResource: "Shader", ofType: "fsh")!
-            if !self.compileShader(&fragShader, type: GLenum(GL_FRAGMENT_SHADER), file: fragShaderPathname) {
-                ////////print("Failed to compile fragment shader")
-                return false
-            }
+        //创建并编译片段着色器.
+        fragShaderPathname = Bundle.main.path(forResource: "Shader", ofType: "fsh")!
+        if !self.compileShader(&fragShader, type: GLenum(GL_FRAGMENT_SHADER), file: fragShaderPathname) {
+            ////////print("Failed to compile fragment shader")
+            return false
         }
         
         
@@ -794,6 +785,7 @@ class MiniCubeViewController: GLKViewController{
         uniforms[UNIFORM_MODELVIEWPROJECTION_MATRIX] = glGetUniformLocation(program, "modelViewProjectionMatrixShader")
         //uniforms[UNIFORM_NORMAL_MATRIX] = glGetUniformLocation(program, "normalMatrix")
         uniforms[UNIFORM_COLOR] = glGetUniformLocation(program, "colorShader")
+        uniforms[UNIFORM_SHADER_TYPE] = glGetUniformLocation(program, "shaderType")
         
         //释放着色器
         if vertShader != 0 {
